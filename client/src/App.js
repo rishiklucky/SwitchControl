@@ -8,14 +8,14 @@ function App() {
       <nav className="navbar navbar-dark bg-dark px-4">
         <span className="navbar-brand">SwitchControl</span>
 
-        <div>
+        {/* <div>
           <Link className="btn btn-outline-light me-2" to="/">
             Manual Control
           </Link>
           <Link className="btn btn-outline-light" to="/settings">
             Settings
           </Link>
-        </div>
+        </div> */}
       </nav>
 
       <Routes>
