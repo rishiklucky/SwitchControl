@@ -14,15 +14,12 @@ app.use(express.json());
 app.use("/api/settings", require("./routes/settings"));
 
 // ---------- SERVE REACT BUILD ----------
-app.use(
-  express.static(path.join(__dirname, "public/build"))
-);
+const buildPath = path.join(__dirname, "public/build");
+app.use(express.static(buildPath));
 
-// ---------- SPA FALLBACK (VERY IMPORTANT) ----------
-app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "public/build", "index.html")
-  );
+// ---------- SPA FALLBACK (FIXED) ----------
+app.use((req, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
 });
 
 // ---------- START SERVER ----------
