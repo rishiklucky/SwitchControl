@@ -1,37 +1,35 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import API from "../services/api";
 
 function ManualControl() {
   const [currentTime, setCurrentTime] = useState("--:--");
+  const [loadingTime, setLoadingTime] = useState(false); // 🔄 loading state
   const offCounter = useRef(0);
 
-  const turnOn = () => {
-    API.post("/settings/update", {
-      deviceStatus: "ON"
-    });
-  };
-
-  const turnOff = () => {
+  const turnOff = async () => {
     offCounter.current += 1;
 
-    API.post("/settings/update", {
+    await API.post("/settings/update", {
       deviceStatus: "OFF",
       offCommandId: offCounter.current
     });
   };
 
-  // fetch ESP32 time
-  useEffect(() => {
-    const timer = setInterval(() => {
-      API.get("/settings").then(res => {
-        if (res.data.currentTime) {
-          setCurrentTime(res.data.currentTime);
-        }
-      });
-    }, 1000);
+  const showEspTime = async () => {
+    setLoadingTime(true); // start loading
 
-    return () => clearInterval(timer);
-  }, []);
+    // 1️⃣ ask ESP32 to send time
+    await API.post("/settings/update", {
+      requestTime: true
+    });
+
+    // 2️⃣ wait for ESP32 loop
+    setTimeout(async () => {
+      const res = await API.get("/settings");
+      setCurrentTime(res.data.currentTime || "--:--");
+      setLoadingTime(false); // stop loading
+    }, 3000); // must be > ESP32 delay
+  };
 
   return (
     <div className="container text-center mt-5">
@@ -41,10 +39,26 @@ function ManualControl() {
         ESP32 Time: {currentTime}
       </h4>
 
-      {/* <button className="btn btn-success m-3" onClick={turnOn}>
-        ON
-      </button> */}
+      {/* 🔄 SHOW TIME BUTTON */}
+      <button
+        className="btn btn-info m-3"
+        onClick={showEspTime}
+        disabled={loadingTime}
+      >
+        {loadingTime ? (
+          <>
+            <span
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+            />
+            Fetching...
+          </>
+        ) : (
+          "Show ESP Time"
+        )}
+      </button>
 
+      {/* 🔴 OFF BUTTON */}
       <button className="btn btn-danger m-3" onClick={turnOff}>
         OFF
       </button>

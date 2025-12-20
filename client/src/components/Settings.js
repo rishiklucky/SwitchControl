@@ -4,7 +4,7 @@ import API from "../services/api";
 function Settings() {
   const [onAngle, setOnAngle] = useState(180);
   const [offAngle, setOffAngle] = useState(150);
-  const [autoOffTime, setAutoOffTime] = useState("22:30");
+  const [autoOffTime, setAutoOffTime] = useState("05:00");
 
   const saveSettings = () => {
     API.post("/settings/update", {

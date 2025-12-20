@@ -3,6 +3,8 @@ const Settings = require("../models/Settings");
 
 // GET settings
 router.get("/", async (req, res) => {
+  res.set("Cache-Control", "no-store"); // avoid browser cache
+
   let data = await Settings.findOne();
   if (!data) data = await Settings.create({});
   res.json(data);
@@ -10,26 +12,9 @@ router.get("/", async (req, res) => {
 
 // UPDATE settings
 router.post("/update", async (req, res) => {
-  const {
-    deviceStatus,
-    onAngle,
-    offAngle,
-    autoOffTime,
-    currentTime,
-    offCommandId
-  } = req.body;
-
-  if (onAngle !== undefined && (onAngle < 0 || onAngle > 180)) {
-    return res.status(400).json({ message: "Invalid ON angle" });
-  }
-
-  if (offAngle !== undefined && (offAngle < 0 || offAngle > 180)) {
-    return res.status(400).json({ message: "Invalid OFF angle" });
-  }
-
   const updated = await Settings.findOneAndUpdate(
     {},
-    { deviceStatus, onAngle, offAngle, autoOffTime, currentTime, offCommandId },
+    { $set: req.body },
     { new: true, upsert: true }
   );
 
