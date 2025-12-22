@@ -3,7 +3,7 @@ import API from "../services/api";
 
 function ManualControl() {
   const [currentTime, setCurrentTime] = useState("--:--");
-  const [loadingTime, setLoadingTime] = useState(false); // 🔄 loading state
+  const [loadingTime, setLoadingTime] = useState(false);
   const offCounter = useRef(0);
 
   const turnOff = async () => {
@@ -16,52 +16,60 @@ function ManualControl() {
   };
 
   const showEspTime = async () => {
-    setLoadingTime(true); // start loading
+    setLoadingTime(true);
 
-    // 1️⃣ ask ESP32 to send time
     await API.post("/settings/update", {
       requestTime: true
     });
 
-    // 2️⃣ wait for ESP32 loop
     setTimeout(async () => {
       const res = await API.get("/settings");
       setCurrentTime(res.data.currentTime || "--:--");
-      setLoadingTime(false); // stop loading
-    }, 3000); // must be > ESP32 delay
+      setLoadingTime(false);
+    }, 3000);
   };
 
   return (
-    <div className="container text-center mt-5">
-      <h2>Manual Switch Control</h2>
+    <div className="container mt-5" style={{ maxWidth: "500px" }}>
+      <div className="card shadow-sm text-center p-4">
+        <h3 className="mb-3">🔌 Manual Switch Control</h3>
 
-      <h4 className="text-primary mt-3">
-        ESP32 Time: {currentTime}
-      </h4>
+        {/* TIME DISPLAY */}
+        <div className="border rounded py-3 mb-4 bg-light">
+          <div className="text-muted small">ESP32 Current Time</div>
+          <div className="display-6 fw-bold text-primary">
+            {currentTime}
+          </div>
+        </div>
 
-      {/* 🔄 SHOW TIME BUTTON */}
-      <button
-        className="btn btn-info m-3"
-        onClick={showEspTime}
-        disabled={loadingTime}
-      >
-        {loadingTime ? (
-          <>
-            <span
-              className="spinner-border spinner-border-sm me-2"
-              role="status"
-            />
-            Fetching...
-          </>
-        ) : (
-          "Show ESP Time"
-        )}
-      </button>
+        {/* BUTTONS */}
+        <div className="d-grid gap-3">
+          <button
+            className="btn btn-outline-info btn-lg"
+            onClick={showEspTime}
+            disabled={loadingTime}
+          >
+            {loadingTime ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                />
+                Fetching ESP Time...
+              </>
+            ) : (
+              "⏱ Show ESP Time"
+            )}
+          </button>
 
-      {/* 🔴 OFF BUTTON */}
-      <button className="btn btn-danger m-3" onClick={turnOff}>
-        OFF
-      </button>
+          <button
+            className="btn btn-danger btn-lg"
+            onClick={turnOff}
+          >
+            OFF
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
